@@ -30,7 +30,7 @@ app.get('/asm', function(req, res){
   if (asmCmd != '') {
     inst = asm2inst(asmCmd);
     // hex = fnc
-    text = 'cmd: ' + asmCmd + ', inst: ' + inst + ' , hex: ' + hex;
+    text = asmCmd + '_' + inst + '_' + hex;
     //console.log("12, 5: " + dec2bin(12,5));
     //console.log("12, 20: " + dec2bin(12,20));
     //console.log("-1, 5: " + dec2bin(-1,5));
@@ -85,8 +85,24 @@ function asm2inst(asm){
     case 'slli':
     case 'srli':
     case 'srai':
-      f3 = (op == 'addi' ? f30 : f31);
-      inst = f3 + '-' + itype;
+      f3 = (op == 'addi' ? f30 : 
+            op == 'slti' ? f32 : 
+            op == 'sltiu' ? f33 : 
+            op == 'xori' ? f34 : 
+            op == 'ori' ? f36 : 
+            op == 'andi' ? f37 : 
+            op == 'slli' ? f31 : f35);  // Default = Srli, Srai
+      rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+      args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
+      rs1 = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+      args = args.substr(args.indexOf(',') + 1);  // Remove rs1 from args; only imm/shamt left
+      if (op == 'slli' || op == 'srli' || op == 'srai') {
+        shamt = dec2bin(parseInt(args),5);
+        imm = (op == 'srai' ? '0100000' + shamt : '0000000' + shamt);
+      } else {
+        imm = dec2bin(parseInt(args),12);
+      }
+      inst = imm + '-' + rs1 + '-' + f3 + '-' + rd + '-' + itype;
       break;
     case 'add':
     case 'sub':

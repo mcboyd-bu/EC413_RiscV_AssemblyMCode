@@ -25,7 +25,7 @@
       <div class="row">
         <div class="col-lg-12 col-md-12">
           <form action="/api/data" method="POST">
-		        Assembly Instruction: <input class="ml-3 mr-3" type="text" name="cmd" id="cmd">
+		        Assembly Instruction (no spaces after commas, please!): <input class="ml-3 mr-3" type="text" name="cmd" id="cmd">
 		        <button type="submit">Convert</button>
 		      </form>
 		      <div>
@@ -76,7 +76,11 @@
           success: function(result){
             // console.log("GET success: " + result);
             $('#cmd').val('');
-            $('#resultsTable > tbody:last-child').append('<tr><td>'+result+'</td><td>inst</td><td>hex</td></tr>');
+            var resCmd = result.substr(0, result.indexOf('_'));
+            var resNew = result.substr(result.indexOf('_')+1);
+            var resInst = resNew.substr(0, resNew.indexOf('_'));
+            resNew = resNew.substr(resNew.indexOf('_')+1);
+            $('#resultsTable > tbody:last-child').append('<tr><td>'+resCmd+'</td><td>'+resInst+'</td><td>'+resNew+'</td></tr>');
           },
           error: function(){
             console.log("in error");
