@@ -68,6 +68,11 @@ function asm2inst(asm){
     case 'bge':
     case 'bltu':
     case 'bgeu':
+      f3 = (op == 'beq' ? f30 : 
+            op == 'bne' ? f31 : 
+            op == 'blt' ? f34 : 
+            op == 'bge' ? f35 : 
+            op == 'bltu' ? f36 : f37);  // Default = Bgeu
       inst = branch;
       break;
     case 'lw':
