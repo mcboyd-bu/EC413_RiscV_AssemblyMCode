@@ -19,7 +19,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 
 
-app.get('/', (request, response) =>  response.sendFile(`${__dirname}/index.html`));
+app.get('/', (request, response) =>  response.sendFile(`${__dirname}/asm.html`));
 
 app.get('/asm', function(req, res){
   const asmCmd = req.query.cmd;
