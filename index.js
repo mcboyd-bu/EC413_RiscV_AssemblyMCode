@@ -25,11 +25,19 @@ app.get('/asm', function(req, res){
   const asmCmd = req.query.cmd;
   var text = 'empty';
   var inst = '';
-  var hex = '';
-  // console.log("asmCmd: " + asmCmd + ", text: " + text);
+  var prehex = '';
+  var hexbyte = '';
+  var hex = '0x';
   if (asmCmd != '') {
     inst = asm2inst(asmCmd);
-    // hex = fnc
+    prehex = inst.replace(/-/g, '');
+    var i = 0;
+    while (i < 30) {
+      hexbyte = prehex.substr(i,4);
+      hex = hex + parseInt(hexbyte, 2).toString(16);
+      i = i + 4;
+    }
+
     text = asmCmd + '_' + inst + '_' + hex;
     //console.log("12, 5: " + dec2bin(12,5));
     //console.log("12, 20: " + dec2bin(12,20));
@@ -43,7 +51,9 @@ function asm2inst(asm){
   var inst = '';
   var op = asm.substr(0, asm.indexOf(' ')).toLowerCase();
   var args = asm.substr(asm.indexOf(' ') + 1).toLowerCase();
+  args = args.replace(/ /g, '');
   var f3 = f30;
+  var f7 = '0000000';
   var rd = '';
   var rs1 = '';
   var rs2 = '';
@@ -51,16 +61,31 @@ function asm2inst(asm){
   var shamt = '';
   switch(op) {
     case 'lui':
-      inst = lui;
+      rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+      args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
+      imm = dec2bin(parseInt(args),20);
+      inst = imm + '_' + rd + '_' + lui;
       break;
     case 'auipc':
-      inst = auipc;
+      rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+      args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
+      imm = dec2bin(parseInt(args),20);
+      inst = imm + '_' + rd + '_' + auipc;
       break;
     case 'jal':
-      inst = jal;
+      rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+      args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
+      imm = dec2bin(parseInt(args),21);
+      inst = imm.substr(0,1) + imm.substr(10,20) + imm.substr(9,10) + imm.substr(1,9) + '_' + rd + '_' + jal;
       break;
     case 'jalr':
-      inst = jalr;
+      f3 = f30;
+      rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+      args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
+      imm = dec2bin(parseInt(args.substr(0, asm.indexOf('('))),12);
+      args = args.substr(args.indexOf('(') + 1);  // Remove imm from args
+      rs1 = dec2bin(parseInt(args.substr(1, asm.indexOf(')'))),5);
+      inst = imm + '-' + rs1 + '-' + f3 + '-' + rd + '-' + jalr;
       break;
     case 'beq':
     case 'bne':
@@ -68,18 +93,35 @@ function asm2inst(asm){
     case 'bge':
     case 'bltu':
     case 'bgeu':
-      f3 = (op == 'beq' ? f30 : 
-            op == 'bne' ? f31 : 
-            op == 'blt' ? f34 : 
-            op == 'bge' ? f35 : 
+      f3 = (op == 'beq' ? f30 :
+            op == 'bne' ? f31 :
+            op == 'blt' ? f34 :
+            op == 'bge' ? f35 :
             op == 'bltu' ? f36 : f37);  // Default = Bgeu
-      inst = branch;
+      rs1 = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+      args = args.substr(args.indexOf(',') + 1);  // Remove rs1 from args
+      rs2 = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+      args = args.substr(args.indexOf(',') + 1);  // Remove rs2 from args; only imm left
+      imm = dec2bin(parseInt(args),13);
+      inst = imm.substr(0,1) + imm.substr(2,6) + '-' + rs2 + '-' + rs1 + '-' + f3 + '-' + imm.substr(8,4) + imm.substr(1,1) + '-' +  branch;
       break;
     case 'lw':
-      inst = lw;
+      f3 = f32;
+      rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+      args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
+      imm = dec2bin(parseInt(args.substr(0, asm.indexOf('('))),12);
+      args = args.substr(args.indexOf('(') + 1);  // Remove imm from args
+      rs1 = dec2bin(parseInt(args.substr(1, asm.indexOf(')'))),5);
+      inst = imm + '-' + rs1 + '-' + f3 + '-' + rd + '-' + lw;
       break;
     case 'sw':
-      inst = sw;
+      f3 = f32;
+      rs2 = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+      args = args.substr(args.indexOf(',') + 1);  // Remove rs2 from args
+      imm = dec2bin(parseInt(args.substr(0, asm.indexOf('('))),12);
+      args = args.substr(args.indexOf('(') + 1);  // Remove imm from args
+      rs1 = dec2bin(parseInt(args.substr(1, asm.indexOf(')'))),5);
+      inst = imm.substr(0,7) + '-' + rs2 + '-' + rs1 + '-' + f3 + '-' + imm.substr(7) + '-' + sw;
       break;
     case 'addi':
     case 'slti':
@@ -90,12 +132,12 @@ function asm2inst(asm){
     case 'slli':
     case 'srli':
     case 'srai':
-      f3 = (op == 'addi' ? f30 : 
-            op == 'slti' ? f32 : 
-            op == 'sltiu' ? f33 : 
-            op == 'xori' ? f34 : 
-            op == 'ori' ? f36 : 
-            op == 'andi' ? f37 : 
+      f3 = (op == 'addi' ? f30 :
+            op == 'slti' ? f32 :
+            op == 'sltiu' ? f33 :
+            op == 'xori' ? f34 :
+            op == 'ori' ? f36 :
+            op == 'andi' ? f37 :
             op == 'slli' ? f31 : f35);  // Default = Srli, Srai
       rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
       args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
@@ -119,7 +161,23 @@ function asm2inst(asm){
     case 'sra':
     case 'or':
     case 'and':
-      inst = rtype;
+      f3 = (op == 'add' ? f30 :
+            op == 'sub' ? f30 :
+            op == 'sll' ? f31 :
+            op == 'slt' ? f32 :
+            op == 'sltu' ? f33 :
+            op == 'xor' ? f34 :
+            op == 'srl' ? f35 :
+            op == 'sra' ? f35 :
+            op == 'or' ? f36 : f37);  // Default = And
+      f7 = (op == 'sub' ? f71 :
+            op == 'sra' ? f71 : f70);
+      rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+      args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
+      rs1 = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+      args = args.substr(args.indexOf(',') + 1);  // Remove rs1 from args; only rs2 left
+      rs2 = dec2bin(parseInt(args.substr(1)),5);
+      inst = f7 + '-' + rs2 + '-' + rs1 + '-' + f3 + '-' + rd + '-' + rtype;
       break;
     default:
       inst = 'invalid';
@@ -136,11 +194,11 @@ function dec2bin(dec, size){
   // If it's a negative number, it will be 32 bits in legth, so trim
   if (dec < 0) {
     retVal = bin.substr((32-parseInt(size)));
-  } 
+  }
   // Else, it will only be exactly as long as needed to represent the decimal in binary, so pad
   else {
-    var pad = "00000000000000000000";
-    retVal = pad.substring(20-parseInt(size)+bin.length) + bin;
+    var pad = "000000000000000000000";
+    retVal = pad.substring(21-parseInt(size)+bin.length) + bin;
   }
   return retVal;
 }
@@ -165,6 +223,10 @@ const f34 = '100';
 const f35 = '101';
 const f36 = '110';
 const f37 = '111';
+
+// Constants for funct7
+const f70 = '0000000';
+const f71 = '0100000';
 
 
 app.listen(3001, () => console.info('Application running on port 3001'));
