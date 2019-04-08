@@ -74,7 +74,9 @@
         var hex = '0x';
         var resInst = asm2inst(d2);
         var resCmd = d2;
-        prehex = resInst.replace(/-/g, '');
+        prehex = resInst.replace(/_/g, '');
+        console.log(resInst);
+        console.log(prehex);
         var i = 0;
         while (i < 30) {
           hexbyte = prehex.substr(i,4);
@@ -125,31 +127,33 @@
         var shamt = '';
         switch(op) {
           case 'lui':
-            rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+            //console.log(regSwitch('a0'));
+            //console.log(args.substr(0, args.indexOf(',')));
+            rd = dec2bin(regSwitch(args.substr(0, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
             imm = dec2bin(parseInt(args),20);
             inst = imm + '_' + rd + '_' + lui;
             break;
           case 'auipc':
-            rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+            rd = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
             imm = dec2bin(parseInt(args),20);
             inst = imm + '_' + rd + '_' + auipc;
             break;
           case 'jal':
-            rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+            rd = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
             imm = dec2bin(parseInt(args),21);
             inst = imm.substr(0,1) + imm.substr(10,20) + imm.substr(9,10) + imm.substr(1,9) + '_' + rd + '_' + jal;
             break;
           case 'jalr':
             f3 = f30;
-            rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+            rd = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
-            imm = dec2bin(parseInt(args.substr(0, asm.indexOf('('))),12);
+            imm = dec2bin(parseInt(args.substr(0, args.indexOf('('))),12);
             args = args.substr(args.indexOf('(') + 1);  // Remove imm from args
-            rs1 = dec2bin(parseInt(args.substr(1, asm.indexOf(')'))),5);
-            inst = imm + '-' + rs1 + '-' + f3 + '-' + rd + '-' + jalr;
+            rs1 = dec2bin(parseInt(args.substr(1, args.indexOf(')'))),5);
+            inst = imm + '_' + rs1 + '_' + f3 + '_' + rd + '_' + jalr;
             break;
           case 'beq':
           case 'bne':
@@ -162,30 +166,30 @@
                   op == 'blt' ? f34 :
                   op == 'bge' ? f35 :
                   op == 'bltu' ? f36 : f37);  // Default = Bgeu
-            rs1 = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+            rs1 = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rs1 from args
-            rs2 = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+            rs2 = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rs2 from args; only imm left
             imm = dec2bin(parseInt(args),13);
-            inst = imm.substr(0,1) + imm.substr(2,6) + '-' + rs2 + '-' + rs1 + '-' + f3 + '-' + imm.substr(8,4) + imm.substr(1,1) + '-' +  branch;
+            inst = imm.substr(0,1) + imm.substr(2,6) + '_' + rs2 + '_' + rs1 + '_' + f3 + '_' + imm.substr(8,4) + imm.substr(1,1) + '_' +  branch;
             break;
           case 'lw':
             f3 = f32;
-            rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+            rd = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
-            imm = dec2bin(parseInt(args.substr(0, asm.indexOf('('))),12);
+            imm = dec2bin(parseInt(args.substr(0, args.indexOf('('))),12);
             args = args.substr(args.indexOf('(') + 1);  // Remove imm from args
-            rs1 = dec2bin(parseInt(args.substr(1, asm.indexOf(')'))),5);
-            inst = imm + '-' + rs1 + '-' + f3 + '-' + rd + '-' + lw;
+            rs1 = dec2bin(parseInt(args.substr(1, args.indexOf(')'))),5);
+            inst = imm + '_' + rs1 + '_' + f3 + '_' + rd + '_' + lw;
             break;
           case 'sw':
             f3 = f32;
-            rs2 = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+            rs2 = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rs2 from args
-            imm = dec2bin(parseInt(args.substr(0, asm.indexOf('('))),12);
+            imm = dec2bin(parseInt(args.substr(0, args.indexOf('('))),12);
             args = args.substr(args.indexOf('(') + 1);  // Remove imm from args
-            rs1 = dec2bin(parseInt(args.substr(1, asm.indexOf(')'))),5);
-            inst = imm.substr(0,7) + '-' + rs2 + '-' + rs1 + '-' + f3 + '-' + imm.substr(7) + '-' + sw;
+            rs1 = dec2bin(parseInt(args.substr(1, args.indexOf(')'))),5);
+            inst = imm.substr(0,7) + '_' + rs2 + '_' + rs1 + '_' + f3 + '_' + imm.substr(7) + '_' + sw;
             break;
           case 'addi':
           case 'slti':
@@ -203,9 +207,9 @@
                   op == 'ori' ? f36 :
                   op == 'andi' ? f37 :
                   op == 'slli' ? f31 : f35);  // Default = Srli, Srai
-            rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+            rd = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
-            rs1 = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+            rs1 = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rs1 from args; only imm/shamt left
             if (op == 'slli' || op == 'srli' || op == 'srai') {
               shamt = dec2bin(parseInt(args),5);
@@ -213,7 +217,7 @@
             } else {
               imm = dec2bin(parseInt(args),12);
             }
-            inst = imm + '-' + rs1 + '-' + f3 + '-' + rd + '-' + itype;
+            inst = imm + '_' + rs1 + '_' + f3 + '_' + rd + '_' + itype;
             break;
           case 'add':
           case 'sub':
@@ -236,12 +240,12 @@
                   op == 'or' ? f36 : f37);  // Default = And
             f7 = (op == 'sub' ? f71 :
                   op == 'sra' ? f71 : f70);
-            rd = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+            rd = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
-            rs1 = dec2bin(parseInt(args.substr(1, asm.indexOf(','))),5);
+            rs1 = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rs1 from args; only rs2 left
             rs2 = dec2bin(parseInt(args.substr(1)),5);
-            inst = f7 + '-' + rs2 + '-' + rs1 + '-' + f3 + '-' + rd + '-' + rtype;
+            inst = f7 + '_' + rs2 + '_' + rs1 + '_' + f3 + '_' + rd + '_' + rtype;
             break;
           default:
             inst = 'invalid';
@@ -263,6 +267,76 @@
         }
         return retVal;
       }
+
+      const regSwitch = (register) => ({
+        "zero": 0,
+        "x0": 0,
+        "ra": 1,
+        "x1": 1,
+        "sp": 2,
+        "x2": 2,
+        "gp": 3,
+        "x3": 3,
+        "tp": 4,
+        "x4": 4,
+        "t0": 5,
+        "x5": 5,
+        "t1": 6,
+        "x6": 6,
+        "t2": 7,
+        "x7": 7,
+        "s0": 8,
+        "fp": 8,
+        "x8": 8,
+        "s1": 9,
+        "x9": 9,
+        "a0": 10,
+        "x10": 10,
+        "a1": 11,
+        "x11": 11,
+        "a2": 12,
+        "x12": 12,
+        "a3": 13,
+        "x13": 13,
+        "a4": 14,
+        "x14": 14,
+        "a5": 15,
+        "x15": 15,
+        "a6": 16,
+        "x16": 16,
+        "a7": 17,
+        "x17": 17,
+        "s2": 18,
+        "x18": 18,
+        "s3": 19,
+        "x19": 19,
+        "s4": 20,
+        "x20": 20,
+        "s5": 21,
+        "x21": 21,
+        "s6": 22,
+        "x22": 22,
+        "s7": 23,
+        "x23": 23,
+        "s8": 24,
+        "x24": 24,
+        "s9": 25,
+        "x25": 25,
+        "s10": 26,
+        "x26": 26,
+        "s11": 27,
+        "x27": 27,
+        "t3": 28,
+        "x28": 28,
+        "t4": 29,
+        "x29": 29,
+        "t5": 30,
+        "x30": 30,
+        "t6": 31,
+        "x31": 31
+      })[register];
+      regSwitch("t6") // "31"
+
     </script>
 </body>
 
