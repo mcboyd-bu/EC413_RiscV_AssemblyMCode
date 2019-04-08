@@ -135,24 +135,24 @@
             inst = imm + '_' + rd + '_' + lui;
             break;
           case 'auipc':
-            rd = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
+            rd = dec2bin(regSwitch(args.substr(0, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
             imm = dec2bin(parseInt(args),20);
             inst = imm + '_' + rd + '_' + auipc;
             break;
           case 'jal':
-            rd = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
+            rd = dec2bin(regSwitch(args.substr(0, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
             imm = dec2bin(parseInt(args),21);
             inst = imm.substr(0,1) + imm.substr(10,20) + imm.substr(9,10) + imm.substr(1,9) + '_' + rd + '_' + jal;
             break;
           case 'jalr':
             f3 = f30;
-            rd = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
+            rd = dec2bin(regSwitch(args.substr(0, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
             imm = dec2bin(parseInt(args.substr(0, args.indexOf('('))),12);
             args = args.substr(args.indexOf('(') + 1);  // Remove imm from args
-            rs1 = dec2bin(parseInt(args.substr(1, args.indexOf(')'))),5);
+            rs1 = dec2bin(regSwitch(args.substr(0, args.indexOf(')'))),5);
             inst = imm + '_' + rs1 + '_' + f3 + '_' + rd + '_' + jalr;
             break;
           case 'beq':
@@ -166,29 +166,29 @@
                   op == 'blt' ? f34 :
                   op == 'bge' ? f35 :
                   op == 'bltu' ? f36 : f37);  // Default = Bgeu
-            rs1 = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
+            rs1 = dec2bin(regSwitch(args.substr(0, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rs1 from args
-            rs2 = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
+            rs2 = dec2bin(regSwitch(args.substr(0, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rs2 from args; only imm left
             imm = dec2bin(parseInt(args),13);
             inst = imm.substr(0,1) + imm.substr(2,6) + '_' + rs2 + '_' + rs1 + '_' + f3 + '_' + imm.substr(8,4) + imm.substr(1,1) + '_' +  branch;
             break;
           case 'lw':
             f3 = f32;
-            rd = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
+            rd = dec2bin(regSwitch(args.substr(0, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
             imm = dec2bin(parseInt(args.substr(0, args.indexOf('('))),12);
             args = args.substr(args.indexOf('(') + 1);  // Remove imm from args
-            rs1 = dec2bin(parseInt(args.substr(1, args.indexOf(')'))),5);
+            rs1 = dec2bin(regSwitch(args.substr(0, args.indexOf(')'))),5);
             inst = imm + '_' + rs1 + '_' + f3 + '_' + rd + '_' + lw;
             break;
           case 'sw':
             f3 = f32;
-            rs2 = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
+            rs2 = dec2bin(regSwitch(args.substr(0, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rs2 from args
             imm = dec2bin(parseInt(args.substr(0, args.indexOf('('))),12);
             args = args.substr(args.indexOf('(') + 1);  // Remove imm from args
-            rs1 = dec2bin(parseInt(args.substr(1, args.indexOf(')'))),5);
+            rs1 = dec2bin(regSwitch(args.substr(0, args.indexOf(')'))),5);
             inst = imm.substr(0,7) + '_' + rs2 + '_' + rs1 + '_' + f3 + '_' + imm.substr(7) + '_' + sw;
             break;
           case 'addi':
@@ -207,9 +207,9 @@
                   op == 'ori' ? f36 :
                   op == 'andi' ? f37 :
                   op == 'slli' ? f31 : f35);  // Default = Srli, Srai
-            rd = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
+            rd = dec2bin(regSwitch(args.substr(0, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
-            rs1 = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
+            rs1 = dec2bin(regSwitch(args.substr(0, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rs1 from args; only imm/shamt left
             if (op == 'slli' || op == 'srli' || op == 'srai') {
               shamt = dec2bin(parseInt(args),5);
@@ -240,11 +240,11 @@
                   op == 'or' ? f36 : f37);  // Default = And
             f7 = (op == 'sub' ? f71 :
                   op == 'sra' ? f71 : f70);
-            rd = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
+            rd = dec2bin(regSwitch(args.substr(0, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
-            rs1 = dec2bin(parseInt(args.substr(1, args.indexOf(','))),5);
+            rs1 = dec2bin(regSwitch(args.substr(0, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rs1 from args; only rs2 left
-            rs2 = dec2bin(parseInt(args.substr(1)),5);
+            rs2 = dec2bin(regSwitch(args),5);
             inst = f7 + '_' + rs2 + '_' + rs1 + '_' + f3 + '_' + rd + '_' + rtype;
             break;
           default:
