@@ -144,7 +144,7 @@
             rd = dec2bin(regSwitch(args.substr(0, args.indexOf(','))),5);
             args = args.substr(args.indexOf(',') + 1);  // Remove rd from args
             imm = dec2bin(parseInt(args),21);
-            inst = imm.substr(0,1) + imm.substr(10,20) + imm.substr(9,10) + imm.substr(1,9) + '_' + rd + '_' + jal;
+            inst = imm.substr(0,1) + imm.substr(10,10) + imm.substr(9,1) + imm.substr(1,8) + '_' + rd + '_' + jal;
             break;
           case 'jalr':
             f3 = f30;
