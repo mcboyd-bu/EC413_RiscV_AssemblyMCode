@@ -69,6 +69,7 @@
         event.preventDefault();
         var data = $( this ).serialize();
         var d2 = $('#cmd').val();
+	d2 = d2.replace('\t',' ');
         var prehex = '';
         var hexbyte = '';
         var hex = '0x';
