@@ -85,7 +85,8 @@
           i = i + 4;
         }
         var resNew = hex;
-        $('#resultsTable > tbody:last-child').append('<tr><td>'+resCmd+'</td><td>'+resInst+'</td><td>'+resNew+'</td></tr>');
+        //$('#resultsTable > tbody:last-child').append('<tr><td>'+resCmd+'</td><td>'+resInst+'</td><td>'+resNew+'</td></tr>');
+	$('<tr><td>'+resCmd+'</td><td>'+resInst+'</td><td>'+resNew+'</td></tr>').prependTo("#resultsTable > tbody");
         $('#cmd').val('');
       });
 
