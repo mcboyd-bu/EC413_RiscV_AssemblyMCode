@@ -65,6 +65,8 @@
 
   <!-- Javascript driving page functionality -->
     <script>
+	    var test = parseInt(0xFDC,13);
+	    console.log(test);
       $( "form" ).on( "submit", function( event ) {
         event.preventDefault();
         var data = $( this ).serialize();
