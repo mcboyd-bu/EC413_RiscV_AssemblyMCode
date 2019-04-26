@@ -68,7 +68,7 @@
 	    
       $( "form" ).on( "submit", function( event ) {
         event.preventDefault();
-	var test = parseInt(0xFDC,13);
+	var test = dec2bin(parseInt(0xFDC,13));
 	console.log(test);
         var data = $( this ).serialize();
         var d2 = $('#cmd').val();
