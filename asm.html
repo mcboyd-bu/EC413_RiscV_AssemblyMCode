@@ -65,10 +65,11 @@
 
   <!-- Javascript driving page functionality -->
     <script>
-	    var test = parseInt(0xFDC,13);
-	    console.log(test);
+	    
       $( "form" ).on( "submit", function( event ) {
         event.preventDefault();
+	var test = parseInt(0xFDC,13);
+	console.log(test);
         var data = $( this ).serialize();
         var d2 = $('#cmd').val();
 	d2 = d2.replace('\t',' ');
